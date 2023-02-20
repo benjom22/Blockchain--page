@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project</title>
+	<script src="https://unpkg.com/@metamask/legacy-web3@latest/dist/metamask.web3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+    <style>
+       @keyframes color {
+  0%   { background: #33CCCC; }
+  20%  { background: #33CC36; }
+  40%  { background: #B8CC33; }
+  60%  { background: #FCCA00; }
+  80%  { background: #33CC36; }
+  100% { background: #33CCCC; }
+}
+
+body {
+  background: #33CCCC; /* Fallback */
+  animation: color 9s infinite linear;
+  text-align: center;
+  padding: 2em;
+}
+
+.container{  
+  text-align: center;    
+  width: 500x;  
+  height: 400px;  
+  padding-top: 100px;  
+  } 
+  
+table{
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid black;
+}
+
+.donate {
+    background-color:rgba(255, 0, 0, 0);
+    border-radius: 30px;
+    padding: 10px;
+    align-items: center;
+    margin: auto;
+}
+
+.connect {
+	margin-bottom: 10px;
+    background-color:rgba(255, 0, 0, 0);
+    border-radius: 30px;
+    padding: 10px;
+    align-items: center;
+}
+
+.connectC {
+	margin-bottom: 10px;
+    background-color:rgba(255, 0, 0, 0);
+    border-radius: 30px;
+    padding: 10px;
+    align-items: center;
+}
+
+donation-amount {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+}
+
+input[type=text] {
+    padding:5px;
+    border:0;
+    box-shadow:0 0 15px 4px rgba(0,0,0,0.06);
+    border-radius:10px;
+}
+
+button:hover {
+            background-color: red;
+            text-decoration: solid;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>Welcome to the Charity Donation Page</h1>
+	<button type="button" class="connect" onclick="connectMetamask()">Connect Metamask</button>
+	<button type="button" class="connectC" onclick="connectContract()">Connect to contract</button>
+    <div class="container">
+        <label>Enter donation amount:</label>
+        <input type="text" id="donationAmount" placeholder="Enter amount here" /><br/><br/>
+        <button type="button" class="donate" onclick="donateFunds()">Donate</button>
+        <p id="contractArea"></p>
+    </form>
+    <br/><br/>
+    <h2>Our Message :)</h2>
+    <button type="button" class="donate" onclick="getMessage()">Message</button>
+    <p id="donators"></p>
+    <br/><br/>
+    <h2>Current Balance:</h2>
+    <p id="dataArea"></p>
+    <button type="button" class="donate" onclick="readContract()">Check Balance</button>
+    </div> 
+
+
+    <script>
+		let account;
+		const connectMetamask = async () => {
+			if (typeof window.ethereum !== 'undefined') {
+            const accounts = await ethereum.request({method:"eth_requestAccounts"});
+			account = accounts[0];
+        } else {
+            // MetaMask is not installed
+            console.log('Please install MetaMask to use this feature.')
+        }
+		}
+        
+
+        //connect to contract
+        const connectContract = async () => {
+
+            const ABI = [
+	{
+		"inputs": [],
+		"name": "donate",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "beneficiary",
+		"outputs": [
+			{
+				"internalType": "address payable",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "donators",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "_id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "GetMessage",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "viewBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+            const Address = "0x84bb14fa80D768a54d6978eBcfc5afC866b311Df";
+            window.web3 = await new Web3(window.ethereum);
+            window.contract = await new window.web3.eth.Contract( ABI, Address); 
+        }
+
+        
+
+         //3-read data from smart contract
+         const readContract = async () => {
+            const data1 = await window.contract.methods.viewBalance().call();
+            document.getElementById("dataArea").innerHTML = data1;
+           
+        }
+
+		const getMessage = async () => {
+			const data2 = await window.contract.methods.GetMessage().call();
+            document.getElementById("donators").innerHTML = data2;
+        }
+
+		const donateFunds = async () => {
+			const value1 = document.getElementById("donationAmount").value;
+			await window.contract.methods.donate(value1).send({from:account});
+        }
+		
+
+
+    </script>
+</body>
+</html>
